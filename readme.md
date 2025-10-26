@@ -1,3 +1,7 @@
+![pic (2)](https://github.com/user-attachments/assets/616ce7d3-0a12-4477-bf36-eeada2f13671)
+![pic (3)](https://github.com/user-attachments/assets/eb6690e9-c034-4ffe-ab09-782e98bb2731)
+![pic (1)](https://github.com/user-attachments/assets/10c7592d-357e-43c7-ae98-151c80c4218e)
+
 ## 📌 Project Summary
 This is a lightweight TypeScript Solana auto trading bot that watches for newly launched tokens (e.g., Pump.fun events) and executes trades automatically. It uses a fast streaming source (gRPC/WebSocket) to detect token launches and tries to buy at the earliest possible moment. You can plug in your own buy/sell strategies through simple function hooks or JSON rules.
 
@@ -181,12 +185,10 @@ interface BotApi {
 3. Run BOT:
    ```
    npx ts-node trade.ts
-   bash
-
   Or Run start.bat
-   ```
+   
 
----
+
 
 ## ❗ Legal & ethical note
 Automated trading, sniping, or interacting with new token launches can carry technical, legal, and ethical risks. This project is provided for educational purposes. You are responsible for:
