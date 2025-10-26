@@ -179,10 +179,13 @@ interface BotApi {
 1. Install Node.js (v18+ recommended).  
 2. Configure `.env`.  
 3. Run BOT:
-   ```bash
-  npx ts-node trade.ts
    ```
-Or Run start.bat
+   npx ts-node trade.ts
+   bash
+
+  Or Run start.bat
+   ```
+
 ---
 
 ## ❗ Legal & ethical note
