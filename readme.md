@@ -1,7 +1,3 @@
-![pic (2)](https://github.com/user-attachments/assets/616ce7d3-0a12-4477-bf36-eeada2f13671)
-![pic (3)](https://github.com/user-attachments/assets/eb6690e9-c034-4ffe-ab09-782e98bb2731)
-![pic (1)](https://github.com/user-attachments/assets/10c7592d-357e-43c7-ae98-151c80c4218e)
-
 ## 📌 Project Summary
 This is a lightweight TypeScript Solana auto trading bot that watches for newly launched tokens (e.g., Pump.fun events) and executes trades automatically. It uses a fast streaming source (gRPC/WebSocket) to detect token launches and tries to buy at the earliest possible moment. You can plug in your own buy/sell strategies through simple function hooks or JSON rules.
 
@@ -24,34 +20,7 @@ Key goals:
 
 ---
 
-## ⚙️ Quick Config (`.env` example)
-```bash
-# Wallet
-PUBLIC_KEY=your_wallet_public_key
-PRIVATE_KEY=your_wallet_private_key
 
-# Trading
-BUY_SOL=0.5
-BUY_SLIPPAGE=1000          # in basis points (e.g., 1000 = 10.00%)
-SELL1_SLIPPAGE=1000
-SELL2_SLIPPAGE=1000
-PRIORITY_FEE=0.00000000005
-
-# Time & behavior
-EVENT_TIMEOUT_MS=900
-FIRST_SELL_DELAY_MS=500
-SECOND_SELL_DELAY_MS=1500
-
-# APIs
-SOLANA_STREAMING_API_KEY=
-RPC_ENDPOINT=https://your.rpc.node
-
-# Modes
-DRY_RUN=true               # if true, won't broadcast transactions
-LOG_LEVEL=info
-```
-
----
 
 ## 🧭 How it works (simple flow)
 1. Start bot → load config → connect to streaming API.  
@@ -70,71 +39,7 @@ You can provide strategies two ways:
 1. **JS/TS function hooks** — full code control.  
 2. **Declarative JSON rules** — simple rule-based behavior (no code).
 
-### A. TypeScript strategy interface (recommended)
-Create a file `strategies/myStrategy.ts` and export an object that follows this shape:
 
-```ts
-import { TradeContext, Strategy } from "../types";
-
-export const myStrategy: Strategy = {
-  // decide whether to buy (true/false)
-  shouldBuy: async (context: TradeContext) => {
-    // context: { mint, launchTime, timeDiffMs, priceData, liquidity, ... }
-    // Example: buy if time difference <= 900ms AND liquidity > threshold
-    if (context.timeDiffMs <= 900 && context.liquidity > 0.5) return true;
-    return false;
-  },
-
-  // custom buy behavior: returns buy result or throws
-  onBuy: async (context, api) => {
-    // api.buy(mint, amountSol, slippage)
-    return await api.buy(context.mint, context.config.BUY_SOL, context.config.BUY_SLIPPAGE);
-  },
-
-  // handle each sell phase (phase = 1, 2, ...)
-  onSellPhase: async (phase, context, api) => {
-    if (phase === 1) {
-      // sell 70%
-      return await api.sellPercent(context.tokenAccount, 70, context.config.SELL1_SLIPPAGE);
-    } else if (phase === 2) {
-      // sell remaining
-      return await api.sellPercent(context.tokenAccount, 100, context.config.SELL2_SLIPPAGE);
-    }
-  },
-
-  // optional: handle failures / retries
-  onError: async (err, context) => {
-    // e.g., log to monitoring service
-  }
-};
-```
-
-Then load it in your bot setup:
-```ts
-import { myStrategy } from "./strategies/myStrategy";
-bot.setStrategy(myStrategy);
-```
-
-### B. JSON rule strategy (easy, no-code)
-Create `strategies/simple.json`:
-```json
-{
-  "buy": {
-    "maxTimeDiffMs": 900,
-    "minLiquidity": 0.3,
-    "amountSol": 0.5,
-    "slippageBp": 1000
-  },
-  "sellPhases": [
-    { "delayMs": 500, "percent": 70, "slippageBp": 1000 },
-    { "delayMs": 1500, "percent": 100, "slippageBp": 1000 }
-  ],
-  "retry": { "maxAttempts": 0, "backoffMs": 500 }
-}
-```
-`maxAttempts: 0` means infinite retry. The bot will read this and run the specified actions.
-
----
 
 ## 🧪 Example strategies (ideas you can copy)
 1. **Time-first sniper** — buy only if `timeDiffMs <= 500ms`.
@@ -157,18 +62,7 @@ Create `strategies/simple.json`:
 
 ---
 
-## 🧰 Utilities / API provided to strategies
-When writing `onBuy` / `onSellPhase`, the bot exposes a small API:
-```ts
-interface BotApi {
-  buy(mint: string, amountSol: number, slippageBp: number): Promise<BuyResult>;
-  sellPercent(tokenAccount: string, percent: number, slippageBp: number): Promise<SellResult>;
-  getPrice(mint: string): Promise<number>;
-  getLiquidity(mint: string): Promise<number>;
-  wait(ms: number): Promise<void>;
-  log(level: string, msg: string): void;
-}
-```
+
 
 ---
 
